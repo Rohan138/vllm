@@ -423,6 +423,10 @@ steps:
       label: ":amd: (MI355) Distributed DP + EP"
       dind: false
       optional: false
+      commands:
+      - export NCCL_CUMEM_HOST_ENABLE=0 NCCL_DEBUG=INFO NCCL_DEBUG_SUBSYS=INIT,RAS
+      - (ip -brief addr || cat /proc/net/dev); (env | grep -E "^(NCCL|RCCL|HSA|HIP|GLOO)_" || true); hostname
+      - (rc=0; for i in 1 2 3; do echo "=== RAS debug run $$i"; torchrun --nproc-per-node=8 ../examples/features/torchrun/torchrun_dp_example_offline.py --tp-size=2 --pp-size=1 --dp-size=4 --enable-ep || rc=1; done; exit $$rc)
       device: mi355_8
       timeout_in_minutes: 50
       depends_on:
